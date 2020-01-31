@@ -1,0 +1,67 @@
+# import libraries
+from urllib.request import urlopen
+from bs4 import BeautifulSoup
+import requests
+import lxml.html as lh
+import pandas as pd
+
+
+# specify the url
+url = "http://proxydb.net/by/isp"
+
+# Connect to the website and return the html to the variable ‘page’
+try:
+    page = urlopen(url)
+except:
+    print("Error opening the URL")
+
+# parse the html using beautiful soup and store in variable `soup`
+soup = BeautifulSoup(page, 'html.parser')
+
+# Take out the <div> of name and get its value
+content = soup.find('div', {"class": "container-fluid"})
+
+#http://proxydb.net/by/isp
+'''
+article = ''
+for i in content.findAll('p'):
+    article = article + ' ' +  i.text
+print(article)
+
+# Saving the scraped text
+with open('scraped_text.txt', 'w') as file:
+    file.write(article)
+    '''
+
+
+
+#Create a handle, page, to handle the contents of the website
+page = requests.get(url)
+#Store the contents of the website under doc
+doc = lh.fromstring(page.content)
+#Parse data that are stored between <tr>..</tr> of HTML
+tr_elements = doc.xpath('//tbody')
+#Check the length of the first 12 rows
+#[len(T) for T in tr_elements[:1200]]
+
+tr_elements = doc.xpath('//tbody')
+#Create empty list
+col=[]
+i=0
+
+
+#For each row, store each first element (header) and an empty list
+for t in tr_elements[0]:
+    i+=1
+    name=t.text_content() 
+    
+    print ("%d:%s"%(i,name))
+    col.append((name,[]))
+    
+
+Dict={title:column for (title,column) in col}
+df=pd.DataFrame(Dict)
+
+df.head()
+    
+
